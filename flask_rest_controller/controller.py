@@ -7,7 +7,7 @@ except:
 
 import urllib
 
-from flask import redirect, url_for, render_template, session, request, abort
+from flask import redirect, url_for, render_template, session, request, abort, current_app
 from flask.views import MethodView
 
 
@@ -15,11 +15,12 @@ __all__ = ['BaseRender', 'JsonRender', 'TemplateRender', 'BaseHandler', 'Control
 
 
 class BaseRender(object):
-    pass
+    mimetype = None
 
 
 class JsonRender(BaseRender):
     def render_json(self, data):
+        self.mimetype = "application/json"
         if not isinstance(data, dict) or not isinstance(data, list):
             data = [data]
         return json.dumps(data)
@@ -27,6 +28,7 @@ class JsonRender(BaseRender):
 
 class TemplateRender(BaseRender):
     def render_template(self, template_path, values={}):
+        self.mimetype = "text/html; charset=utf-8"
         return render_template(template_path, **values)
 
 
@@ -36,16 +38,26 @@ class BaseHandler(MethodView):
             return self.authenticate_error()
         if not self.prepare():
             return self.prepare_error()
-        return super(BaseHandler, self).dispatch_request(*args, **kwargs)
+
+        response = super(BaseHandler, self).dispatch_request(*args, **kwargs)
+        return self.after_response(response)
 
 
 class Controller(TemplateRender, JsonRender, BaseHandler):
     methods = ['GET', 'POST', 'PUT', 'DELETE']
     storage = dict()
+    headers = dict()
 
     def __init__(self, *args, **kwargs):
         super(Controller, self).__init__(*args, **kwargs)
         self.storage = dict()
+        self.headers = dict()
+
+    def add_header(self, key, value):
+        self.headers[key] = value
+
+    def get_headers(self):
+        return self.headers
 
     def authenticate(self):
         return True
@@ -70,6 +82,9 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
 
     def delete(self, *args, **kwargs):
         return self.post()
+
+    def after_response(self, response):
+        return current_app.response_class(response, headers=self.get_headers(), mimetype=self.mimetype.lower())
 
     def render_error(self):
         return self.error_404()
