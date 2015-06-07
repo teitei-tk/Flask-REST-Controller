@@ -17,22 +17,34 @@ __all__ = ['BaseRender', 'JsonRender', 'TemplateRender', 'BaseHandler', 'Control
 class BaseRender(object):
     mimetype = None
 
+    def set_mimetype(self, mimetype):
+        self.mimetype = mimetype.lower()
+
 
 class JsonRender(BaseRender):
+    """
+    for rendering a json response
+    """
     def render_json(self, data):
-        self.mimetype = "application/json"
+        self.set_mimetype("application/json")
         if not isinstance(data, dict) or not isinstance(data, list):
             data = [data]
         return json.dumps(data)
 
 
 class TemplateRender(BaseRender):
+    """
+    for rendering a html template
+    """
     def render_template(self, template_path, values={}):
-        self.mimetype = "text/html; charset=utf-8"
+        self.mimetype("text/html; charset=utf-8")
         return render_template(template_path, **values)
 
 
 class BaseHandler(MethodView):
+    """
+    handling a dispatch for request
+    """
     def dispatch_request(self, *args, **kwargs):
         if not self.authenticate():
             return self.authenticate_error()
@@ -44,7 +56,17 @@ class BaseHandler(MethodView):
 
 
 class Controller(TemplateRender, JsonRender, BaseHandler):
-    methods = ['GET', 'POST', 'PUT', 'DELETE']
+    """
+    base Class based Controller implemented,
+    If you want to use this class, please use to perform extends
+
+    When there was a request to the methods, the appropriate method is run method
+
+    example:
+        HTTP GET Request -> get
+        HTTP POST Request -> post
+    """
+    methods = ['GET', 'POST']
     storage = dict()
     headers = dict()
 
@@ -60,15 +82,27 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
         return self.headers
 
     def authenticate(self):
+        """
+        run validat about your authentication
+        """
         return True
 
     def authenticate_error(self):
+        """
+        run for authenticate error
+        """
         return self.render_error()
 
     def prepare(self):
+        """
+        prepare your validation and Update logic
+        """
         return True
 
     def prepare_error(self):
+        """
+        run fot prepare error
+        """
         return self.render_error()
 
     def get(self, *args, **kwargs):
@@ -112,5 +146,4 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
 
         query = [(k, v) for k, v in sorted(params.items())]
         params = urllib.urlencode(query)
-        url = "{0}?{1}".format(uri, params)
-        return redirect(url)
+        return redirect("{0}?{1}".format(uri, params))
