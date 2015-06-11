@@ -6,5 +6,14 @@ from flask_rest_controller import Controller
 
 
 class HogeController(Controller):
+    schema = {
+        'type': 'object',
+        'properties': {
+            'id': {
+                'type': 'string',
+            },
+        },
+    }
+
     def get(self, id):
-        return self.render_json(id)
+        return self.render_json({"id": id})

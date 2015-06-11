@@ -57,8 +57,10 @@ class BaseHandler(MethodView):
             return self.prepare_error()
 
         response = super(BaseHandler, self).dispatch_request(*args, **kwargs)
-        if self.should_schema_check:
-            self.valid_schema(response)
+
+        json_response = json.loads(response)
+        if self.should_schema_check and self.is_json_response(json_response):
+            self.valid_schema(json_response)
         return self.after_response(response)
 
 
@@ -97,8 +99,7 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
         return True
 
     def valid_schema(self, response):
-        if not isinstance(self.schema, list) or \
-                not self.is_json_response(response):
+        if not isinstance(self.schema, dict):
             return response
         return jsonschema.validate(response, self.schema)
 

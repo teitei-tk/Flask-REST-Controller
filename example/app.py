@@ -11,6 +11,13 @@ app.secret_key = '\x96hy\x96\xd6\x86\xb8#\xf0\x17\x81\n\xd8\x8a\xd3kp\x9c\xfd\xf
 
 
 class IndexController(Controller):
+    schema = {
+        'type': 'array',
+        'items': {
+            'type': 'string',
+        }
+    }
+
     def get(self):
         return self.render_json(["hoge"])
 
