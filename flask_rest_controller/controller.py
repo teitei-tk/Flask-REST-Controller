@@ -5,7 +5,9 @@ try:
 except:
     import json
 
+
 import urllib
+import jsonschema
 
 from flask import redirect, url_for, render_template, session, request, abort, current_app
 from flask.views import MethodView
@@ -27,9 +29,12 @@ class JsonRender(BaseRender):
     """
     def render_json(self, data):
         self.set_mimetype("application/json")
-        if not isinstance(data, dict) or not isinstance(data, list):
+        if not self.is_json_response(data):
             data = [data]
         return json.dumps(data)
+
+    def is_json_response(self, response):
+        return isinstance(response, dict) or isinstance(response, list)
 
 
 class TemplateRender(BaseRender):
@@ -52,6 +57,8 @@ class BaseHandler(MethodView):
             return self.prepare_error()
 
         response = super(BaseHandler, self).dispatch_request(*args, **kwargs)
+        if self.should_schema_check:
+            self.valid_schema(response)
         return self.after_response(response)
 
 
@@ -66,9 +73,10 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
         HTTP GET Request -> get
         HTTP POST Request -> post
     """
-    methods = ['GET', 'POST']
+    methods = ['GET', 'POST', 'PUT', 'DELETE']
     storage = dict()
     headers = dict()
+    schema = None
 
     def __init__(self, *args, **kwargs):
         super(Controller, self).__init__(*args, **kwargs)
@@ -80,6 +88,19 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
 
     def get_headers(self):
         return self.headers
+
+    @property
+    def should_schema_check(self):
+        """
+        can verify using json schema of json response,
+        """
+        return True
+
+    def valid_schema(self, response):
+        if not isinstance(self.schema, list) or \
+                not self.is_json_response(response):
+            return response
+        return jsonschema.validate(response, self.schema)
 
     def authenticate(self):
         """
