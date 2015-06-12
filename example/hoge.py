@@ -16,4 +16,9 @@ class HogeController(Controller):
     }
 
     def get(self, id):
+        self.storage['hoge_id'] = id
         return self.render_json({"id": id})
+
+    def after(self):
+        id = self.storage['hoge_id']
+        self.add_header("X-HOGE-ID", id)

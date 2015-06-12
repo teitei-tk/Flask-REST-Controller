@@ -51,9 +51,9 @@ class BaseHandler(MethodView):
     handling a dispatch for request
     """
     def dispatch_request(self, *args, **kwargs):
-        if not self.authenticate():
+        if not self.authenticate(*args, **kwargs):
             return self.authenticate_error()
-        if not self.prepare():
+        if not self.prepare(*args, **kwargs):
             return self.prepare_error()
 
         response = super(BaseHandler, self).dispatch_request(*args, **kwargs)
@@ -103,7 +103,7 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
             return response
         return jsonschema.validate(response, self.schema)
 
-    def authenticate(self):
+    def authenticate(self, *args, **kwargs):
         """
         run validat about your authentication
         """
@@ -115,7 +115,7 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
         """
         return self.render_error()
 
-    def prepare(self):
+    def prepare(self, *args, **kwargs):
         """
         prepare your validation and Update logic
         """
@@ -126,6 +126,9 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
         run fot prepare error
         """
         return self.render_error()
+
+    def after(self):
+        pass
 
     def get(self, *args, **kwargs):
         raise NotImplementedError()
