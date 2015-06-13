@@ -2,5 +2,6 @@
 
 ROUTING_VIEWS = [
     ("/", "app.IndexController", "foo"),
-    ("/hoge/<id>", "hoge.HogeController", "hoge")
+    ("/hoge/<id>", "hoge.HogeController", "hoge"),
+    ("/fuga", "template.TemplateController", "fuga")
 ]

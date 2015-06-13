@@ -27,14 +27,22 @@ class JsonController(Controller):
             },
             'value': {
                 'type': 'string'
+            },
+            'request': {
+                'type': 'integer'
             }
         }
     }
 
-    def get(self, id):
+    def prepare(self, id):
         id = int(id)
         self.storage['request_id'] = id
-        return self.render_json({'id': id, 'value': "hoge"})
+        return True
+
+    def get(self, id):
+        id = self.storage['request_id']
+        value = int(self.request.values.get('request'))
+        return self.render_json({'id': id, 'value': "hoge", 'request': value})
 
     def after(self):
         self.add_header('X-REQUEST-ID', self.storage['request_id'])
@@ -90,10 +98,10 @@ class TestController(unittest.TestCase):
             self.assertEqual(response.data, html)
 
     def test_json_controller(self):
-        with app.test_request_context("/test_json_controller/1"):
+        with app.test_request_context("/test_json_controller/1?request=1000"):
             response = self.get_response()
 
-            json_value = {'id': 1, 'value': 'hoge'}
+            json_value = {'id': 1, 'value': 'hoge', 'request': 1000}
             render_json = json.dumps(json_value)
 
             self.assertEqual(JsonController.json_mime_type, response.mimetype)

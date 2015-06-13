@@ -10,13 +10,17 @@ class HogeController(Controller):
         'type': 'object',
         'properties': {
             'id': {
-                'type': 'string',
+                'type': 'integer',
             },
         },
     }
 
+    def prepare(self, id):
+        self.storage['hoge_id'] = int(id)
+        return True
+
     def get(self, id):
-        self.storage['hoge_id'] = id
+        id = self.storage['hoge_id']
         return self.render_json({"id": id})
 
     def after(self):
