@@ -22,6 +22,14 @@ class BaseRender(object):
     def set_mimetype(self, mimetype):
         self.mimetype = mimetype.lower()
 
+    @property
+    def request(self):
+        return request
+
+    @property
+    def into(self):
+        return self.request.method.lower()
+
 
 class JsonRender(BaseRender):
     """
@@ -47,10 +55,26 @@ class JsonRender(BaseRender):
         """
         return True
 
+    def _detect_schema_value(self):
+        schema = None
+
+        for key in self.schema.keys():
+            if not key.lower() == self.into:
+                continue
+            schema = self.schema[key]
+            break
+
+        if not schema:
+            schema = self.schema
+
+        return schema
+
     def valid_schema(self, response):
         if not isinstance(self.schema, dict):
             return response
-        return jsonschema.validate(response, self.schema)
+
+        schema = self._detect_schema_value()
+        return jsonschema.validate(response, schema)
 
     def is_json_response(self, response):
         return isinstance(response, dict) or isinstance(response, list)
@@ -164,16 +188,8 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
         return abort(404)
 
     @property
-    def request(self):
-        return request
-
-    @property
     def session(self):
         return session
-
-    @property
-    def into(self):
-        return self.request.method.lower()
 
     def redirect(self, uri, params={}):
         try:

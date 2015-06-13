@@ -7,12 +7,25 @@ from flask_rest_controller import Controller
 
 class HogeController(Controller):
     schema = {
-        'type': 'object',
-        'properties': {
-            'id': {
-                'type': 'integer',
+        'get': {
+            'type': 'object',
+            'properties': {
+                'id': {
+                    'type': 'integer',
+                },
             },
         },
+        'post': {
+            'type': 'object',
+            'properties': {
+                'result': {
+                    'type': 'string',
+                },
+                'code': {
+                    'type': 'integer',
+                }
+            },
+        }
     }
 
     def prepare(self, id):
@@ -22,6 +35,9 @@ class HogeController(Controller):
     def get(self, id):
         id = self.storage['hoge_id']
         return self.render_json({"id": id})
+
+    def post(self, id):
+        return self.render_json({"result": "OK", "code": 200})
 
     def after(self):
         id = self.storage['hoge_id']
