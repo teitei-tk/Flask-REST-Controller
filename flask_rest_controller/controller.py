@@ -27,15 +27,17 @@ class JsonRender(BaseRender):
     """
     for rendering a json response
     """
+    json_mime_type = "application/json"
     schema = None
 
     def render_json(self, data):
-        self.set_mimetype("application/json")
         if not self.is_json_response(data):
             data = [data]
 
         if self.should_schema_check:
             self.valid_schema(data)
+
+        self.set_mimetype(self.json_mime_type)
         return json.dumps(data)
 
     @property
@@ -58,8 +60,10 @@ class TemplateRender(BaseRender):
     """
     for rendering a html template
     """
+    html_mime_type = "text/html"
+
     def render_template(self, template_path, values={}):
-        self.mimetype("text/html; charset=utf-8")
+        self.set_mimetype(self.html_mime_type)
         return render_template(template_path, **values)
 
 
@@ -131,6 +135,11 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
         return self.render_error()
 
     def after(self):
+        """
+        your performed after execution method
+
+        this method please use the override
+        """
         pass
 
     def get(self, *args, **kwargs):
