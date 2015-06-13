@@ -17,7 +17,7 @@ Flask-REST-Controller is added Class-Based-View(Controller) extension on [Flask]
 
 ## Installation
 ```
-$ pip install flask-rest-controller
+$ pip install Flask-REST-Controller
 ```
 
 ## Usage
