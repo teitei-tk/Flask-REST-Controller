@@ -1,8 +1,9 @@
 # Flask-REST-Controller
-
 ---
+[![Build Status](https://travis-ci.org/teitei-tk/Flask-REST-Controller.svg?branch=master)](https://travis-ci.org/teitei-tk/Flask-REST-Controller)
 
-Flask-REST-Controller is added Class-Based-View(Controller) extension on [Flask](http://flask.pocoo.org/)
+Flask-REST-Controller is added Class-Based-View(Controller) extension on [Flask](http://flask.pocoo.org/)   
+
 
 ## Features
 * Follow the RESTful design
