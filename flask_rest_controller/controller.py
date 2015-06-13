@@ -27,11 +27,28 @@ class JsonRender(BaseRender):
     """
     for rendering a json response
     """
+    schema = None
+
     def render_json(self, data):
         self.set_mimetype("application/json")
         if not self.is_json_response(data):
             data = [data]
+
+        if self.should_schema_check:
+            self.valid_schema(data)
         return json.dumps(data)
+
+    @property
+    def should_schema_check(self):
+        """
+        can verify using json schema of json response,
+        """
+        return True
+
+    def valid_schema(self, response):
+        if not isinstance(self.schema, dict):
+            return response
+        return jsonschema.validate(response, self.schema)
 
     def is_json_response(self, response):
         return isinstance(response, dict) or isinstance(response, list)
@@ -50,6 +67,8 @@ class BaseHandler(MethodView):
     """
     handling a dispatch for request
     """
+    methods = ['GET', 'POST', 'PUT', 'DELETE']
+
     def dispatch_request(self, *args, **kwargs):
         if not self.authenticate(*args, **kwargs):
             return self.authenticate_error()
@@ -57,10 +76,8 @@ class BaseHandler(MethodView):
             return self.prepare_error()
 
         response = super(BaseHandler, self).dispatch_request(*args, **kwargs)
+        self.after()
 
-        json_response = json.loads(response)
-        if self.should_schema_check and self.is_json_response(json_response):
-            self.valid_schema(json_response)
         return self.after_response(response)
 
 
@@ -75,10 +92,8 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
         HTTP GET Request -> get
         HTTP POST Request -> post
     """
-    methods = ['GET', 'POST', 'PUT', 'DELETE']
     storage = dict()
     headers = dict()
-    schema = None
 
     def __init__(self, *args, **kwargs):
         super(Controller, self).__init__(*args, **kwargs)
@@ -90,18 +105,6 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
 
     def get_headers(self):
         return self.headers
-
-    @property
-    def should_schema_check(self):
-        """
-        can verify using json schema of json response,
-        """
-        return True
-
-    def valid_schema(self, response):
-        if not isinstance(self.schema, dict):
-            return response
-        return jsonschema.validate(response, self.schema)
 
     def authenticate(self, *args, **kwargs):
         """
@@ -134,13 +137,13 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
         raise NotImplementedError()
 
     def post(self, *args, **kwargs):
-        return self.get()
+        raise NotImplementedError()
 
     def put(self, *args, **kwargs):
-        return self.post()
+        raise NotImplementedError()
 
     def delete(self, *args, **kwargs):
-        return self.post()
+        raise NotImplementedError()
 
     def after_response(self, response):
         return current_app.response_class(response, headers=self.get_headers(), mimetype=self.mimetype.lower())
