@@ -1,7 +1,6 @@
 Flask-REST-Controller
 =====================
 
---------------
 
 Flask-REST-Controller is added Class-Based-View(Controller) extension on
 `Flask <http://flask.pocoo.org/>`__
@@ -120,3 +119,4 @@ LICENSE
 -------
 
 -  MIT
+
