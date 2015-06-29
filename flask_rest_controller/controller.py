@@ -95,7 +95,7 @@ class BaseHandler(MethodView):
     """
     handling a dispatch for request
     """
-    methods = ['GET', 'POST', 'PUT', 'DELETE']
+    methods = ['GET', 'POST']
 
     def dispatch_request(self, *args, **kwargs):
         if not self.authenticate(*args, **kwargs):
@@ -107,32 +107,6 @@ class BaseHandler(MethodView):
         self.after()
 
         return self.after_response(response)
-
-
-class Controller(TemplateRender, JsonRender, BaseHandler):
-    """
-    base Class based Controller implemented,
-    If you want to use this class, please use to perform extends
-
-    When there was a request to the methods, the appropriate method is run method
-
-    example:
-        HTTP GET Request -> get
-        HTTP POST Request -> post
-    """
-    storage = dict()
-    headers = dict()
-
-    def __init__(self, *args, **kwargs):
-        super(Controller, self).__init__(*args, **kwargs)
-        self.storage = dict()
-        self.headers = dict()
-
-    def add_header(self, key, value):
-        self.headers[key] = value
-
-    def get_headers(self):
-        return self.headers
 
     def authenticate(self, *args, **kwargs):
         """
@@ -177,6 +151,35 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
 
     def delete(self, *args, **kwargs):
         raise NotImplementedError()
+
+    def after_response(self, response):
+        return response
+
+
+class Controller(TemplateRender, JsonRender, BaseHandler):
+    """
+    base Class based Controller implemented,
+    If you want to use this class, please use to perform extends
+
+    When there was a request to the methods, the appropriate method is run method
+
+    example:
+        HTTP GET Request -> get
+        HTTP POST Request -> post
+    """
+    storage = dict()
+    headers = dict()
+
+    def __init__(self, *args, **kwargs):
+        super(Controller, self).__init__(*args, **kwargs)
+        self.storage = dict()
+        self.headers = dict()
+
+    def add_header(self, key, value):
+        self.headers[key] = value
+
+    def get_headers(self):
+        return self.headers
 
     def after_response(self, response):
         return current_app.response_class(response, headers=self.get_headers(), mimetype=self.mimetype.lower())
