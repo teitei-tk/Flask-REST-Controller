@@ -132,7 +132,8 @@ except ImportError:
     print("Please install setuptools.")
     sys.exit(1)
 
-from .version import VERSION
+import version
+
 
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -150,7 +151,7 @@ classifiers = [
 
 setup(
     name='Flask-REST-Controller',
-    version=VERSION,
+    version=version.VERSION,
     description='Flask-REST-Controller is added Class-Based-View(Controller) extension on Flask',
     long_description=__doc__,
     author='teitei-tk',
