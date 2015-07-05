@@ -141,19 +141,22 @@ class BaseHandler(MethodView):
         pass
 
     def get(self, *args, **kwargs):
-        raise NotImplementedError()
+        self.error404()
 
     def post(self, *args, **kwargs):
-        raise NotImplementedError()
+        self.error404()
 
     def put(self, *args, **kwargs):
-        raise NotImplementedError()
+        self.error404()
 
     def delete(self, *args, **kwargs):
-        raise NotImplementedError()
+        self.error404()
 
     def after_response(self, response):
         return response
+
+    def error_404(self):
+        return abort(404)
 
 
 class Controller(TemplateRender, JsonRender, BaseHandler):
@@ -186,9 +189,6 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
 
     def render_error(self):
         return self.error_404()
-
-    def error_404(self):
-        return abort(404)
 
     @property
     def session(self):

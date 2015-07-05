@@ -34,6 +34,8 @@ class JsonController(Controller):
         }
     }
 
+    methods = ['GET']
+
     def prepare(self, id):
         id = int(id)
         self.storage['request_id'] = id
@@ -112,6 +114,12 @@ class TestController(unittest.TestCase):
                 jsonschema.validate(json_value, JsonController.schema)
             except:
                 self.fail("schema is invalid")
+
+        with app.test_client() as client:
+            response = client.post('/test_json_controller/1?request=1000')
+
+            self.assertFalse('POST' in response.allow)
+            self.assertEqual(405, response.status_code)
 
     def test_json_array_controller(self):
         with app.test_request_context("/test_json_array_controller"):
