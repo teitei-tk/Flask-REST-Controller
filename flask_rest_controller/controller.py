@@ -12,7 +12,6 @@ import jsonschema
 from flask import redirect, url_for, render_template, session, request, abort, current_app
 from flask.views import MethodView
 
-
 __all__ = ['BaseRender', 'JsonRender', 'TemplateRender', 'BaseHandler', 'Controller']
 
 
@@ -141,22 +140,25 @@ class BaseHandler(MethodView):
         pass
 
     def get(self, *args, **kwargs):
-        self.error404()
+        self.error_404()
 
     def post(self, *args, **kwargs):
-        self.error404()
+        self.error_404()
 
     def put(self, *args, **kwargs):
-        self.error404()
+        self.error_404()
 
     def delete(self, *args, **kwargs):
-        self.error404()
+        self.error_404()
 
     def after_response(self, response):
         return response
 
     def error_404(self):
         return abort(404)
+
+    def render_error(self):
+        return self.error_404()
 
 
 class Controller(TemplateRender, JsonRender, BaseHandler):
@@ -186,9 +188,6 @@ class Controller(TemplateRender, JsonRender, BaseHandler):
 
     def after_response(self, response):
         return current_app.response_class(response, headers=self.get_headers(), mimetype=self.mimetype.lower())
-
-    def render_error(self):
-        return self.error_404()
 
     @property
     def session(self):
